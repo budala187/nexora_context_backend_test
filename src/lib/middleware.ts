@@ -5,8 +5,11 @@ import { TOOLS } from '../tools/index.js';
 import { logger } from './logger.js';
 
 const scalekit = new Scalekit(config.skEnvUrl, config.skClientId, config.skClientSecret);
-const EXPECTED_AUDIENCE = `https://23c2f47750f9.ngrok-free.app/`;
-export const WWWHeader = {HeaderKey: 'WWW-Authenticate',HeaderValue: `Bearer realm="OAuth", resource_metadata="https://23c2f47750f9.ngrok-free.app/.well-known/oauth-protected-resource"`}
+const EXPECTED_AUDIENCE = `${config.baseUrl}/`;
+export const WWWHeader = {
+    HeaderKey: 'WWW-Authenticate',
+    HeaderValue: `Bearer realm="OAuth", resource_metadata="${config.baseUrl}/.well-known/oauth-protected-resource"`
+  }
 
 export async function authMiddleware(req: Request, res: Response, next: NextFunction) {
     try {

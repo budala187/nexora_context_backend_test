@@ -37,4 +37,4 @@ logger.info('Transport routes set up successfully');
 registerTools(server);
 logger.info('Registered tools successfully');
 
-app.listen(PORT, () => logger.info(`MCP server running on http://localhost:${PORT}`));
+app.listen(PORT, () => logger.info(`MCP server running on ${config.baseUrl} (port ${PORT})`));
