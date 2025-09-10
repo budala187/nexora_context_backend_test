@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
-import { getToolRegistry } from './tool-registry';
-import { logger } from '../../lib/logger';
+import { getToolRegistry } from './tool-registry.js';
+import { logger } from '../../lib/logger.js';
 
 // Model configuration
 const OPENAI_MODEL_ORCHESTRATOR = process.env.OPENAI_MODEL_ORCHESTRATOR!;

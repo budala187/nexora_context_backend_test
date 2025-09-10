@@ -1,5 +1,5 @@
-import { McpServer, RegisteredTool } from '@modelcontextprotocol/sdk/server/mcp';
-import { registerContextFinderTool } from './context-finder';
+import { McpServer, RegisteredTool } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { registerContextFinderTool } from './context-finder.js';
 
 const toolsList = {
   context_finder: {

@@ -1,11 +1,11 @@
-import { logger } from '../../lib/logger';
-import { BaseTool, ToolInfo } from './base-tool';
+import { logger } from '../../lib/logger.js';
+import { BaseTool, ToolInfo } from './base-tool.js';
 
 // Import all tools
-import WebSearchTool from './internal-tools/web-search';
-import CalculatorTool from './internal-tools/calculator';
-import WeatherTool from './internal-tools/weather';
-import DatabaseQueryTool from './internal-tools/database-query';
+import WebSearchTool from './internal-tools/web-search.js';
+import CalculatorTool from './internal-tools/calculator.js';
+import WeatherTool from './internal-tools/weather.js';
+import DatabaseQueryTool from './internal-tools/database-query.js';
 
 export class ToolRegistry {
   private tools: Map<string, BaseTool> = new Map();
