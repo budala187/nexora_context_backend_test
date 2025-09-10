@@ -12,5 +12,19 @@ export const config = {
   skClientSecret: process.env.SK_CLIENT_SECRET || '',
   logLevel: 'info',
   mcpServerId: process.env.MCP_SERVER_ID || '',
-  protectedResourceMetadata: process.env.PROTECTED_RESOURCE_METADATA || '',
+  clerkIssuer: 'https://honest-cod-68.clerk.accounts.dev',
+  clerkJwksUri: 'https://honest-cod-68.clerk.accounts.dev/.well-known/jwks.json',
+  clerkAuthorizationEndpoint: 'https://honest-cod-68.clerk.accounts.dev/oauth/authorize',
+  clerkTokenEndpoint: 'https://honest-cod-68.clerk.accounts.dev/oauth/token',
+  clerkTokenIntrospectionEndpoint: 'https://honest-cod-68.clerk.accounts.dev/oauth/token_info',
+  
+  // Update the protected resource metadata
+  protectedResourceMetadata: JSON.stringify({
+    authorization_servers: ['https://honest-cod-68.clerk.accounts.dev/oauth/authorize'],
+    token_endpoint: 'https://honest-cod-68.clerk.accounts.dev/oauth/token',
+    token_introspection_endpoint: 'https://honest-cod-68.clerk.accounts.dev/oauth/token_info',
+    bearer_methods_supported: ['header'],
+    resource: process.env.BASE_URL || 'https://23c2f47750f9.ngrok-free.app/',
+    scopes_supported: ['openid', 'profile', 'email']
+  })
 };

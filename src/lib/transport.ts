@@ -12,9 +12,19 @@ export const setupTransportRoutes = (
       sessionIdGenerator: undefined, // stateless
     });
     
+    // Inject user context into the request body
+    const enrichedBody = {
+      ...req.body,
+      _context: {
+        clerkUserId: req.user?.id,
+        userEmail: req.user?.email,
+        usageStrategy: req.usageStrategy
+      }
+    };
+    
     await server.connect(transport);
     try {
-      await transport.handleRequest(req, res, req.body);
+      await transport.handleRequest(req, res, enrichedBody);
     } catch (error) {
       logger.error('Transport error:', error);
     }
