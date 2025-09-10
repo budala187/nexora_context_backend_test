@@ -2,8 +2,7 @@ import { BaseTool, ToolConfig, ToolResponse } from '../base-tool.js';
 import { logger } from '../../../lib/logger.js';
 import OpenAI from 'openai';
 import { createClient } from '@supabase/supabase-js';
-import * as weaviate from 'weaviate-ts-client';
-import { WeaviateClient, ApiKey } from 'weaviate-ts-client';
+import weaviate from "weaviate-ts-client";
 
 // Configuration variables you asked for
 const WEAVIATE_CLASS_NAME = process.env.WEAVIATE_CLASS_NAME!;
@@ -30,7 +29,7 @@ export class DatabaseQueryTool extends BaseTool {
   
   private openai: OpenAI;
   private supabase: any;
-  private weaviateClient: WeaviateClient;
+  private weaviateClient: any;
   
   constructor() {
     super();
@@ -43,8 +42,8 @@ export class DatabaseQueryTool extends BaseTool {
     
     this.weaviateClient = (weaviate as any).client({
       scheme: 'https',
-      host: process.env.WEAVIATE_HOST || '',
-      apiKey: new ApiKey(process.env.WEAVIATE_API_KEY || ''),
+      host: process.env.WEAVIATE_HOST!,
+      apiKey: new (weaviate as any).ApiKey(process.env.WEAVIATE_API_KEY!),
     });
     
   }

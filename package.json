@@ -25,6 +25,7 @@
     "jwks-rsa": "^3.2.0",
     "node-fetch": "^3.3.2",
     "openai": "^5.20.0",
+    "weaviate-client": "^3.8.1",
     "weaviate-ts-client": "^2.2.0",
     "winston": "^3.10.0",
     "yaml": "^2.4.1",
