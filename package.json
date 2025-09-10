@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "",
   "main": "dist/main.js",
-  "type": "module",
   "scripts": {
     "build": "tsc",
     "start": "node dist/main.js",
