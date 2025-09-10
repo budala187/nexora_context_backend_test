@@ -1,10 +1,10 @@
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
-import { logger } from '../lib/logger';
-import { TOOLS } from './index';
-import { trackUsage, decrementUsage } from '../lib/usage';
-import { DatabaseQueryTool } from './internal/internal-tools/database-query';
-import { ToolConfig } from './internal/base-tool'; // Import the actual ToolConfig type
+import { logger } from '../lib/logger.js';
+import { TOOLS } from './index.js';
+import { trackUsage, decrementUsage } from '../lib/usage.js';
+import { DatabaseQueryTool } from './internal/internal-tools/database-query.js';
+import { ToolConfig } from './internal/base-tool.js'; // Import the actual ToolConfig type
 
 export function registerContextFinderTool(server: McpServer) {
   const databaseTool = new DatabaseQueryTool();

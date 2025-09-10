@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import { config } from '../config/config';
-import { logger } from './logger';
+import { config } from '../config/config.js';
+import { logger } from './logger.js';
 import { createClient } from '@supabase/supabase-js';
 
 // Initialize Supabase

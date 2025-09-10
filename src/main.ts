@@ -1,13 +1,13 @@
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 import cors from 'cors';
 import express from 'express';
-import { config } from './config/config';
-import { oauthProtectedResourceHandler } from './lib/auth';
-import { logger } from './lib/logger';
-import { authMiddleware } from './lib/middleware';
-import { setupTransportRoutes } from './lib/transport';
-import { registerTools } from './tools/index';
+import { config } from './config/config.js';
+import { oauthProtectedResourceHandler } from './lib/auth.js';
+import { logger } from './lib/logger.js';
+import { authMiddleware } from './lib/middleware.js';
+import { setupTransportRoutes } from './lib/transport.js';
+import { registerTools } from './tools/index.js';
 
 const PORT = config.port;
 const server = new McpServer({ name: config.serverName, version: config.serverVersion });

@@ -1,6 +1,6 @@
-import { ToolPlan, Tool } from './orchestrator';
-import { getToolRegistry } from './tool-registry';
-import { logger } from '../../lib/logger';
+import { ToolPlan, Tool } from './orchestrator.js';
+import { getToolRegistry } from './tool-registry.js';
+import { logger } from '../../lib/logger.js';
 
 export interface ToolResult {
   tool: string;
