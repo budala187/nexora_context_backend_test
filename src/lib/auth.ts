@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { config } from '../config/config.js';
+import { config } from '../config/config';
 
 export const oauthProtectedResourceHandler = (req: Request, res: Response) => {
     const metadata = JSON.parse(config.protectedResourceMetadata);
