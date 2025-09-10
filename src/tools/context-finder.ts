@@ -1,17 +1,14 @@
-import { McpServer, RegisteredTool } from '@modelcontextprotocol/sdk/server/mcp';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp';
 import { z } from 'zod';
 import { logger } from '../lib/logger';
 import { TOOLS } from './index';
-import { Orchestrator } from './internal/orchestrator';
-import { Executor } from './internal/executor';
-import { Refiner } from './internal/refiner';
-
-// Initialize the three components
-const orchestrator = new Orchestrator();
-const executor = new Executor();
-const refiner = new Refiner();
+import { trackUsage, decrementUsage } from '../lib/usage';
+import { DatabaseQueryTool } from './internal/internal-tools/database-query';
+import { ToolConfig } from './internal/base-tool'; // Import the actual ToolConfig type
 
 export function registerContextFinderTool(server: McpServer) {
+  const databaseTool = new DatabaseQueryTool();
+  
   TOOLS.context_finder.registeredTool = server.tool(
     TOOLS.context_finder.name,
     TOOLS.context_finder.description,
@@ -19,37 +16,123 @@ export function registerContextFinderTool(server: McpServer) {
       query: z.string().min(1, 'Query is required'),
       context: z.record(z.any()).optional().describe('Optional context'),
     },
-    async ({ query, context }) => {
+    async (params) => {
       const startTime = Date.now();
+      const { query, context } = params;
+      
       logger.info(`🤖 Context Finder received: "${query}"`);
       
       try {
-        // Step 1: Orchestrator decides which tools to use
-        logger.info('📋 Step 1: Planning...');
-        const toolPlan = await orchestrator.selectTools(query, context);
+        // Extract user info from context if it exists
+        const clerkUserId = context?._context?.clerkUserId || context?.clerkUserId;
+        const usageStrategy = context?._context?.usageStrategy;
         
-        // Step 2: Executor runs the selected tools
-        logger.info('🔧 Step 2: Executing...');
-        const toolResults = await executor.executeTools(toolPlan);
+        if (!clerkUserId) {
+          logger.error('No user ID found in context');
+          return {
+            content: [{
+              type: 'text',
+              text: 'Error: User authentication required. Please ensure you are properly authenticated.'
+            }],
+          };
+        }
         
-        // Step 3: Refiner combines and cleans results
-        logger.info('✨ Step 3: Refining...');
-        const refinedAnswer = await refiner.refineResults(query, toolResults);
+        logger.info(`Processing query for user: ${clerkUserId}`);
+        
+        // Create proper ToolConfig object with all required fields
+        const config: ToolConfig = {
+          clerkUserId,
+          name: 'database_query', // Required field
+          priority: 1,
+          depth: 'medium',
+          focus: [],
+          reason: 'User query search',
+          ...context // Spread any additional context
+        };
+        
+        const result = await databaseTool.execute(query, config);
         
         const executionTime = Date.now() - startTime;
+        
+        if (!result.success) {
+          logger.error('Database query failed:', result.error);
+          return {
+            content: [{
+              type: 'text',
+              text: `Error searching database: ${result.error || 'Unknown error'}`
+            }],
+          };
+        }
+        
+        // Format results
+        let responseText = '';
+        
+        if (result.data?.results && result.data.results.length > 0) {
+          responseText = `Found ${result.data.totalResults} results across ${Object.keys(result.data.sources || {}).length} sources:\n\n`;
+          
+          // Group results by source
+          const groupedResults: Record<string, any[]> = {};
+          for (const item of result.data.results) {
+            if (!groupedResults[item.source]) {
+              groupedResults[item.source] = [];
+            }
+            groupedResults[item.source].push(item);
+          }
+          
+          // Format by source
+          for (const [source, items] of Object.entries(groupedResults)) {
+            responseText += `\n**From ${source}:**\n`;
+            items.slice(0, 5).forEach((item, idx) => {
+              responseText += `${idx + 1}. ${item.content.substring(0, 200)}${item.content.length > 200 ? '...' : ''}\n`;
+              if (item.score) {
+                responseText += `   Score: ${item.score.toFixed(3)}\n`;
+              }
+            });
+          }
+          
+          if (result.data.queryVariations && result.data.queryVariations.length > 1) {
+            responseText += `\n\nSearched variations: ${result.data.queryVariations.join(', ')}`;
+          }
+        } else {
+          responseText = 'No results found in your database for this query.';
+        }
+        
+        // Track usage with actual token counts if available
+        const tokenUsage = result.data?.tokenUsage || {
+          prompt_tokens: 0,
+          completion_tokens: 0,
+          total_tokens: 0
+        };
+        
+        try {
+          await trackUsage(clerkUserId, 'context_finder', {
+            inputTokens: tokenUsage.prompt_tokens,
+            outputTokens: tokenUsage.completion_tokens,
+            totalTokens: tokenUsage.total_tokens,
+            cost: (tokenUsage.prompt_tokens * 0.00003 + tokenUsage.completion_tokens * 0.00006) / 1000, // GPT-4 pricing
+            processingTime: executionTime,
+            toolsUsed: ['database_query']
+          });
+          
+          // Decrement usage
+          await decrementUsage(clerkUserId, usageStrategy?.useHeroPoints || false);
+        } catch (usageError) {
+          logger.error('Usage tracking failed:', usageError);
+          // Don't fail the request due to usage tracking error
+        }
+        
         logger.info(`✅ Completed in ${executionTime}ms`);
         
         return {
           content: [{
             type: 'text',
-            text: refinedAnswer.content
+            text: responseText
           }],
         };
         
       } catch (error) {
         logger.error('Context finder failed:', error);
         
-        // Properly handle the error type
         const errorMessage = error instanceof Error 
           ? error.message 
           : String(error);

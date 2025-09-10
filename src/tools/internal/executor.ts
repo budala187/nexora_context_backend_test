@@ -10,21 +10,26 @@ export interface ToolResult {
   executionTime: number;
 }
 
+export interface ToolConfig {
+  clerkUserId?: string;
+  [key: string]: any;
+}
+
 export class Executor {
-  async executeTools(plan: ToolPlan): Promise<ToolResult[]> {
+  async executeTools(plan: ToolPlan, clerkUserId?: string): Promise<ToolResult[]> {
     const { tools, strategy } = plan;
     const toolRegistry = getToolRegistry();
     
     logger.info(`🔧 Executing ${tools.length} tools (${strategy})`);
     
     if (strategy === 'parallel') {
-      return this.executeParallel(tools, toolRegistry);
+      return this.executeParallel(tools, toolRegistry, clerkUserId);
     } else {
-      return this.executeSequential(tools, toolRegistry);
+      return this.executeSequential(tools, toolRegistry, clerkUserId);
     }
   }
   
-  private async executeParallel(tools: Tool[], toolRegistry: any): Promise<ToolResult[]> {
+  private async executeParallel(tools: Tool[], toolRegistry: any, clerkUserId?: string): Promise<ToolResult[]> {
     const promises = tools.map(async (toolConfig) => {
       const startTime = Date.now();
       const tool = toolRegistry.getTool(toolConfig.name);
@@ -39,14 +44,17 @@ export class Executor {
       }
       
       try {
-        const result = await tool.execute(toolConfig.params.query || '', {
+        const config: ToolConfig = {
           ...toolConfig.params,
+          clerkUserId,
           name: toolConfig.name,
           priority: toolConfig.priority,
           reason: toolConfig.reason,
           depth: toolConfig.params.depth || 'medium',
           focus: toolConfig.params.focus || []
-        });
+        };
+        
+        const result = await tool.execute(toolConfig.params.query || '', config);
         
         return {
           tool: toolConfig.name,
@@ -69,7 +77,7 @@ export class Executor {
     return await Promise.all(promises);
   }
   
-  private async executeSequential(tools: Tool[], toolRegistry: any): Promise<ToolResult[]> {
+  private async executeSequential(tools: Tool[], toolRegistry: any, clerkUserId?: string): Promise<ToolResult[]> {
     const results: ToolResult[] = [];
     
     for (const toolConfig of tools) {
@@ -87,14 +95,17 @@ export class Executor {
       }
       
       try {
-        const result = await tool.execute(toolConfig.params.query || '', {
+        const config: ToolConfig = {
           ...toolConfig.params,
+          clerkUserId,
           name: toolConfig.name,
           priority: toolConfig.priority,
           reason: toolConfig.reason,
           depth: toolConfig.params.depth || 'medium',
           focus: toolConfig.params.focus || []
-        });
+        };
+        
+        const result = await tool.execute(toolConfig.params.query || '', config);
         
         results.push({
           tool: toolConfig.name,
