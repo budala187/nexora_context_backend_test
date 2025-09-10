@@ -1,11 +1,11 @@
-import { McpServer, RegisteredTool } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { registerGreetingTools } from './greeting.js';
+import { McpServer, RegisteredTool } from '@modelcontextprotocol/sdk/server/mcp';
+import { registerContextFinderTool } from './context-finder';
 
 const toolsList = {
-  greet_user: {
-    name: 'greet_user',
-    description: 'Greets the user with a personalized message. This tool can be used to provide a friendly greeting based on the name of the user.',
-    requiredScopes: ['usr:read'],
+  context_finder: {
+    name: 'context_finder',
+    description: 'Processes any query by automatically selecting and using the best available internal tools to provide comprehensive answers.',
+    requiredScopes: ['context:read'],
   },
 } as const;
 
@@ -19,12 +19,12 @@ export type ToolDefinition = {
 };
 
 export const TOOLS: { [K in ToolKey]: ToolDefinition & { name: K } } = Object.fromEntries(
-Object.entries(toolsList).map(([key, val]) => [
+  Object.entries(toolsList).map(([key, val]) => [
     key,
     { ...val, name: key, requiredScopes: [...val.requiredScopes] } as ToolDefinition & { name: typeof key },
   ])
 ) as any;
 
 export function registerTools(server: McpServer) {
-    registerGreetingTools(server)
+  registerContextFinderTool(server);
 }
