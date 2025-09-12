@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
-import { ToolResult } from './executor';
-import { logger } from '../../lib/logger';
+import { ToolResult } from './executor.js';
+import { logger } from '../../lib/logger.js';
 
 // Model configuration
 const OPENAI_MODEL_REFINER = process.env.OPENAI_MODEL_REFINER!;

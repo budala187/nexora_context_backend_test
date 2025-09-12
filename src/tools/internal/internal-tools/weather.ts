@@ -1,5 +1,5 @@
-import { BaseTool, ToolConfig, ToolResponse } from '../base-tool';
-import { logger } from '../../../lib/logger';
+import { BaseTool, ToolConfig, ToolResponse } from '../base-tool.js';
+import { logger } from '../../../lib/logger.js';
 
 export class WeatherTool extends BaseTool {
   name = 'weather';
